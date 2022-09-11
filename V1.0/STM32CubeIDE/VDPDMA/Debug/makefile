@@ -75,8 +75,8 @@ all: main-build
 main-build: VDPDMA.elf secondary-outputs
 
 # Tool invocations
-VDPDMA.elf VDPDMA.map: $(OBJS) $(USER_OBJS) C:\Users\Duncan\STM32CubeIDE\workspace_1.9.0\VDPDMA\STM32G474RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-g++ -o "VDPDMA.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Duncan\STM32CubeIDE\workspace_1.9.0\VDPDMA\STM32G474RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="VDPDMA.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+VDPDMA.elf VDPDMA.map: $(OBJS) $(USER_OBJS) Z:\duncan\EDA\VDPtoTFT\V1.0\STM32CubeIDE\VDPDMA\STM32G474RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-g++ -o "VDPDMA.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"Z:\duncan\EDA\VDPtoTFT\V1.0\STM32CubeIDE\VDPDMA\STM32G474RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="VDPDMA.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

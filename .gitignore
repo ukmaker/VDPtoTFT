@@ -34,3 +34,6 @@
 
 # Weird STMCube backup files
 *.zip
+# Builds
+Debug/
+Release/

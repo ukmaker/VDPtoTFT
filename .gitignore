@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+
+# Weird STMCube backup files
+*.zip

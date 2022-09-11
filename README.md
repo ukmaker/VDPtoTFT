@@ -23,5 +23,5 @@ I may end up making a custom PCB including the TMS chip so there's an all-in-one
 ![My VDP board with the Nucleo bolted to the side](./images/IMG_0755.jpg)
 ![Yes, I'm cheating. Driving the VDP from an Arduino for now](./images/IMG_0756.JPG)
 ![Close up of an image on the SPI display](./images/IMG_0765.JPG)
-![And a test-pattern on the parallel display](./images/IMG_0875.jpg)
+![And a test-pattern on the parallel display](./images/IMG-0875.jpg)
 ![Here's a bit of test-gear I built to help](./images/IMG_0760.JPG) - see my other project [VideoTrigger](https://github.com/ukmaker/VideoTrigger) for details

@@ -35,3 +35,4 @@ And a test-pattern on the parallel display
 
 Here's a bit of test-gear I built to help. 
 ![VideoTrigger](./images/IMG_0760.JPG) - see my other project [VideoTrigger](https://github.com/ukmaker/VideoTrigger) for details
+

@@ -2098,7 +2098,7 @@ int main(void)
  800100a:	60d3      	str	r3, [r2, #12]
 			HAL_DMA_Start_IT(&hdma_tim20_ch1, (uint32_t)rgbBuf, (uint32_t)&GPIOC->ODR, RGB_BUF_CHUNK_BYTES/2);
  800100c:	4947      	ldr	r1, [pc, #284]	; (800112c <main+0x348>)
- 800100e:	f44f 4340 	mov.w	r3, #49152	; 0xc000
+ 800100e:	f44f 5340 	mov.w	r3, #12288	; 0x3000
  8001012:	4a47      	ldr	r2, [pc, #284]	; (8001130 <main+0x34c>)
  8001014:	4834      	ldr	r0, [pc, #208]	; (80010e8 <main+0x304>)
  8001016:	f004 fe6f 	bl	8005cf8 <HAL_DMA_Start_IT>
@@ -2138,7 +2138,7 @@ int main(void)
 			if (rgbBufchunk == RGB_BUF_CHUNKS) {
  8001048:	4b34      	ldr	r3, [pc, #208]	; (800111c <main+0x338>)
  800104a:	781b      	ldrb	r3, [r3, #0]
- 800104c:	2b01      	cmp	r3, #1
+ 800104c:	2b04      	cmp	r3, #4
  800104e:	d106      	bne.n	800105e <main+0x27a>
 				dmaState = DMA_CAPTURE_STATE_IDLE;
  8001050:	4b30      	ldr	r3, [pc, #192]	; (8001114 <main+0x330>)
@@ -2178,12 +2178,12 @@ int main(void)
  8001082:	4613      	mov	r3, r2
  8001084:	005b      	lsls	r3, r3, #1
  8001086:	4413      	add	r3, r2
- 8001088:	039b      	lsls	r3, r3, #14
+ 8001088:	031b      	lsls	r3, r3, #12
  800108a:	005b      	lsls	r3, r3, #1
  800108c:	4a27      	ldr	r2, [pc, #156]	; (800112c <main+0x348>)
  800108e:	4413      	add	r3, r2
  8001090:	4619      	mov	r1, r3
- 8001092:	f44f 4340 	mov.w	r3, #49152	; 0xc000
+ 8001092:	f44f 5340 	mov.w	r3, #12288	; 0x3000
  8001096:	4a26      	ldr	r2, [pc, #152]	; (8001130 <main+0x34c>)
  8001098:	4813      	ldr	r0, [pc, #76]	; (80010e8 <main+0x304>)
  800109a:	f004 fe2d 	bl	8005cf8 <HAL_DMA_Start_IT>
@@ -6887,9 +6887,9 @@ void MX_TIM8_Init(void)
  8002cc2:	4b44      	ldr	r3, [pc, #272]	; (8002dd4 <MX_TIM8_Init+0x16c>)
  8002cc4:	2200      	movs	r2, #0
  8002cc6:	611a      	str	r2, [r3, #16]
-  htim8.Init.RepetitionCounter = 191;
+  htim8.Init.RepetitionCounter = 47;
  8002cc8:	4b42      	ldr	r3, [pc, #264]	; (8002dd4 <MX_TIM8_Init+0x16c>)
- 8002cca:	22bf      	movs	r2, #191	; 0xbf
+ 8002cca:	222f      	movs	r2, #47	; 0x2f
  8002ccc:	615a      	str	r2, [r3, #20]
   htim8.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
  8002cce:	4b41      	ldr	r3, [pc, #260]	; (8002dd4 <MX_TIM8_Init+0x16c>)

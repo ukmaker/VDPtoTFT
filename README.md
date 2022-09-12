@@ -46,7 +46,6 @@ The output of the VDP's crystal oscillator is used to drive the clock input on t
 
 The VDP is capable of producing 16 different colours, and the generated signal comes from three outputs - Y, R-Y and B-Y. It turns out that sampling only Y and R-Y give us enough information to deduce the colour being generated, which is good as it reduces the amount of processing needed. These signals are fed to the STM's ADC1 and ADC2 which are operated in "dual-mode". This means that both inputs are sampled synchronously under the control of ADC1. The samples are place in a small circular buffer using DMA.
 
-![Sync](./images/Sync.PNG)
 The ADCs are triggered by a timer which is in turn triggered by a comparator which samples the Y signal to determine when horizontal and vertical sync events happen (when the Y signal level drops below the black value). A trimpot is used to set this level correctly. Once a sync event is detected a chain of two timers is used to generate the sampling signals for the ADCs. The first timer (TIM4) starts the second timer (TIM1) after a delay calculated such that TIM1's first output pulse will happen just as the first pixel data is output by the VDP. This delay is approx 12 microseconds from the horizontal sync pulse.
 
 ![ADC Configuration](./images/Inputs.PNG)
@@ -56,7 +55,22 @@ The ADC's DMA channel is set to run in circular mode, with a buffer size of 512 
 If the sync signal stays low for more than one line-time (64 us), TIM3 will detect this as a vertical sync, and raise an interrupt. This is used by the state-machine running in the main() loop to initiate the DMA transfer from the RGB buffer to either the SPI unit or GPIO Port C if a parallel TFT is being used.
 
 ![SPI](./images/SPI.PNG)
-If SPI is being used, the transfer happens in 4 blocks because the maximum size for a single DMA transfer is 65536 transfers. One full frame holds 256 pixels * 192 lines * 2 bytes of data = 98,304 transfers (SPI config for my screen is in bytes). I.e. too many transfers for a single DMA session. The SPI interface is clocked at 42.8MHz, even though the datasheet for the chip used in my display (ILI9341) says the maximum SPI clock speed is 10MHz! Even so, there just is enough time in one frame to sample and transfer all the data so instead the state machine runs a sample for a frame and then takes a frame to refresh the screen. This is visible as 30Hz flicker on the screen. I have ordered a TMS9129 to use in place of the TMS9128. The TMS9129 is the European version which has a 50Hz refresh rate rather than the 60Hz of the TMS9128. With this lower frame rate I think I'll be able to refresh the screen over SPI at a full 50Hz, thus eliminating the flicker.
+If SPI is being used, the transfer happens in 4 blocks because the maximum size for a single DMA transfer is 65536 transfers. One full frame holds 256 pixels * 192 lines * 2 bytes of data = 98,304 transfers (SPI config for my screen is in bytes). I.e. too many transfers for a single DMA session. The SPI interface is clocked at 42.8MHz, even though the datasheet for the chip used in my display (ILI9341) says the maximum SPI clock speed is 10MHz! Even so, there just is not enough time in one frame to sample and transfer all the data so instead the state machine runs a sample for a frame and then takes a frame to refresh the screen. This is visible as 30Hz flicker on the screen. I have ordered a TMS9129 to use in place of the TMS9128. The TMS9129 is the European version which has a 50Hz refresh rate rather than the 60Hz of the TMS9128. With this lower frame rate I think I'll be able to refresh the screen over SPI at a full 50Hz, thus eliminating the flicker.
 
 ![Parallel](./images/Parallel.PNG)
-If a parallel interface is being used the DMA controller can transfer the entire 49K RGB buffer in one go at 60Hz, so there is no flicker. The parallel interfacec is running at 10MHz.
+If a parallel interface is being used the DMA controller can transfer the entire 49K RGB buffer in one go at 60Hz, so there is no flicker. The parallel interface runs at 10MHz.
+
+# Building
+This is a project built using the STM32CubeIDE and the STM32 HAL. If this offends you, feel free to fork my repo and rewrite it in whatever manner you choose.
+
+For now, there is little to do to build this other than
+
+- Install STM32CubeIDE if you haven't already got it
+- Download this repo
+- Open the project in the IDE and build it
+- Connect the Nucleo to the display of your choice (see below)
+- Connect the Nucleo to your VDP
+- Plug everything in 
+- Click Run in the IDE
+
+## Connecting Your Display

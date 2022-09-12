@@ -150,7 +150,6 @@ int main(void)
   MX_TIM1_Init();
   MX_ADC1_Init();
   MX_ADC2_Init();
-  MX_SPI1_Init();
   MX_TIM3_Init();
   MX_TIM2_Init();
   MX_TIM4_Init();
@@ -158,6 +157,7 @@ int main(void)
   MX_TIM5_Init();
   MX_TIM16_Init();
   MX_TIM20_Init();
+  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
 	GPIOB->MODER = (GPIOB->MODER & 0xFFFFFFCF) | 0x00000010;
 	mysetup();
@@ -174,7 +174,7 @@ int main(void)
 	HAL_TIM_RegisterCallback(&htim3, HAL_TIM_OC_DELAY_ELAPSED_CB_ID,
 			VSyncCallback);
 
-	HAL_SPI_RegisterCallback(&hspi1, HAL_SPI_TX_COMPLETE_CB_ID,
+	HAL_SPI_RegisterCallback(&hspi2, HAL_SPI_TX_COMPLETE_CB_ID,
 			SPIFullCallback);
 	HAL_DMA_RegisterCallback(&hdma_tim20_ch1, HAL_DMA_XFER_CPLT_CB_ID,
 			GPIODMAComplete);
@@ -275,11 +275,11 @@ int main(void)
 		case DMA_STATE_START:
 
 #ifndef PAR_TFT
-			while(SPI1->SR & SPI_SR_BSY) {
+			while(SPI2->SR & SPI_SR_BSY) {
 				__NOP();
 			}
 			vsync();
-			while(SPI1->SR & SPI_SR_BSY) {
+			while(SPI2->SR & SPI_SR_BSY) {
 				__NOP();
 			}
 #else
@@ -290,7 +290,7 @@ int main(void)
 			rgbBufIdx = 0;
 			dmaState = DMA_STATE_RUNNING;
 #ifndef PAR_TFT
-			HAL_SPI_Transmit_DMA(&hspi1, (uint8_t *)&rgbBuf, RGB_BUF_CHUNK_BYTES);
+			HAL_SPI_Transmit_DMA(&hspi2, (uint8_t *)&rgbBuf, RGB_BUF_CHUNK_BYTES);
 #else
 			TIM20->DIER &= ~ TIM_DIER_CC1DE;
 			TIM20->DIER |= TIM_DIER_CC1DE;
@@ -314,7 +314,7 @@ int main(void)
 			} else {
 				dmaState = DMA_STATE_RUNNING;
 #ifndef PAR_TFT
-				HAL_SPI_Transmit_DMA(&hspi1, (uint8_t *)&(rgbBuf[rgbBufchunk * RGB_BUF_LEN / RGB_BUF_CHUNKS]), RGB_BUF_CHUNK_BYTES);
+				HAL_SPI_Transmit_DMA(&hspi2, (uint8_t *)&(rgbBuf[rgbBufchunk * RGB_BUF_LEN / RGB_BUF_CHUNKS]), RGB_BUF_CHUNK_BYTES);
 #else
 				TIM20->DIER &= ~ TIM_DIER_CC1DE;
 				TIM20->DIER |= TIM_DIER_CC1DE;

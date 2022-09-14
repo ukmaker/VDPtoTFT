@@ -16,11 +16,11 @@
 
 #ifdef PAR_TFT
 GFX_HW_PAR16 hwspi = GFX_HW_PAR16(GPIOC,
-		GPIOB, GPIO_PIN_11,
-		GPIOB, GPIO_PIN_12,
-		GPIOB, GPIO_PIN_2,
-		GPIOB, GPIO_PIN_14,
-		GPIOB, GPIO_PIN_15);
+GPIOB, GPIO_PIN_11,
+GPIOB, GPIO_PIN_12,
+GPIOB, GPIO_PIN_2,
+GPIOB, GPIO_PIN_14,
+GPIOB, GPIO_PIN_15);
 
 GFX_ILI9325 tft = GFX_ILI9325(hwspi);
 #else
@@ -31,22 +31,18 @@ GFX_ILI9341 tft = GFX_ILI9341(hwspi);
 extern "C" {
 	void mysetup();
 
-	void setLeftWindow();
-
-	void vsync();
-
-	void startDMA();
-
-	void pushpixel(uint16_t c);
+void vsync() {
+	tft.end();
+	tft.setAddressWindow((320 - 256) / 2, (240 - 192) / 2, 256, 192);
 }
 
 void mysetup() {
 	tft.init();
 	tft.setRotation(3);
 	HAL_Delay(10);
-	tft.setAddressWindow(0,0,320,240);
+	tft.setAddressWindow(0, 0, 320, 240);
 	HAL_Delay(10);
-	for(int i=0; i<(320*240); i++) {
+	for (int i = 0; i < (320 * 240); i++) {
 
 		tft.pushPixel(0xffff);
 	}
@@ -63,29 +59,24 @@ void setLeftWindow() {
 
 
 	// write the colors as blocks down the left
-	for(int i=0; i<15; i++) {
-		uint16_t color = rgbMap[i+1];
-		for(int y=0; y<8;y++) {
+	for (int i = 0; i < 15; i++) {
+		uint16_t color = rgbMap[i + 1];
+		for (int y = 0; y < 8; y++) {
 			// fill the gaps
 			tft.pushPixel(0xffff);
 			tft.pushPixel(0xffff);
-			for(int x=0; x<8; x++) {
+			for (int x = 0; x < 8; x++) {
 				tft.pushPixel(color);
 			}
 
 		}
 
-		for(int z = 0; z<20; z++) {
+		for (int z = 0; z < 20; z++) {
 			tft.pushPixel(0xffff);
 		}
 	}
 
 	vsync();
-}
-
-void vsync() {
-	tft.end();
-	tft.setAddressWindow((320-256)/2,(240-192)/2, 256, 192);
 }
 
 void startDMA() {
@@ -94,4 +85,6 @@ void startDMA() {
 
 void pushpixel(uint16_t c) {
 	tft.pushPixel(c);
+}
+
 }

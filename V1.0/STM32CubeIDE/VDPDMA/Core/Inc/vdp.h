@@ -104,7 +104,7 @@ void swapRGBBytes() {
 		rgbMap[i] = (rgb >> 8) | ((rgb & 0xff) << 8);
 	}
 }
-
+void setColorLevels(float yLevels[16], float ryLevels[16]);
 void initColorMaps(float scaleFactor, float offset) {
 
 	// The Y voltages per colour index
@@ -196,17 +196,6 @@ void setColorLevels(float yLevels[16], float ryLevels[16]) {
 			RYMap[i] |= RYmap1[i+1];
 		}
 	}
-
-	// If Y is 1.0V then the colour is white, whatever the value of R-Y
-	//uint8_t white = (1.0 / VREF * ADC_RESOLUTION_STEPS) + offsetBinary;
-	//YMap[white-1] = 0x8000;
-	//YMap[white] = 0x8000;
-	//YMap[white+1] = 0x8000;
-
-	//white = (0.47 / VREF * ADC_RESOLUTION_STEPS) + offsetBinary;
-	//RYMap[white-1] |= 0x8000;
-	//RYMap[white] |= 0x8000;
-	//RYMap[white+1] |= 0x8000;
 }
 
 // clang-format on

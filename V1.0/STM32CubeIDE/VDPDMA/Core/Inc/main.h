@@ -31,6 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "configuration.h"
 
 /* USER CODE END Includes */
 
@@ -58,13 +59,21 @@ void SPIHalfCallback(SPI_HandleTypeDef *spi);
 void SPIFullCallback(SPI_HandleTypeDef *spi);
 void GPIODMAComplete(DMA_HandleTypeDef *dma);
 void ADCCallback(ADC_HandleTypeDef *adc);
+void handleEncoderInputs();
+void updateSetupState();
+void processSetupState();
+void initSetup();
+void cancelSetup();
+
+void tuneYL(uint8_t s);
+void tuneYH(uint8_t s);
+void tuneRYL(uint8_t s);
+void tuneRYH(uint8_t s);
 
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
 /* USER CODE BEGIN Private defines */
-
-#include "configuration.h"
 
 /* USER CODE END Private defines */
 

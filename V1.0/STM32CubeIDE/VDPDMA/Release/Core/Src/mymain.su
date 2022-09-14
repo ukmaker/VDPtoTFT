@@ -1,27 +1,30 @@
-../Core/Inc/GFX_HW_SPI.h:227:15:virtual void GFX_HW_SPI::MY_Delay(uint32_t)	0	static,ignoring_inline_asm
-../Core/Inc/GFX_ILI9341.h:158:15:virtual void GFX_ILI9341::cls()	0	static
-../Core/Inc/GFX_ILI9341.h:191:15:virtual void GFX_ILI9341::setAddressWindow(uint16_t, uint16_t, uint16_t, uint16_t)	24	static
-../Core/Inc/GFX_ILI9341.h:216:15:virtual void GFX_ILI9341::pushPixel(uint16_t)	0	static
-../Core/Inc/GFX_ILI9341.h:220:15:virtual void GFX_ILI9341::end()	0	static
-../Core/Inc/GFX_ILI9341.h:137:15:virtual void GFX_ILI9341::init()	24	static
-../Core/Inc/GFX_ILI9341.h:162:15:virtual void GFX_ILI9341::setRotation(uint8_t)	16	static
-../Core/Inc/GFX_HW_SPI.h:198:15:virtual void GFX_HW_SPI::writeData(const uint8_t*, uint8_t)	0	static
-../Core/Inc/GFX_HW_SPI.h:24:15:virtual void GFX_HW_SPI::reset(uint32_t)	16	static,ignoring_inline_asm
-../Core/Inc/GFX_HW_SPI.h:207:15:virtual void GFX_HW_SPI::write(uint8_t)	16	static
-../Core/Inc/GFX_HW_SPI.h:211:15:virtual void GFX_HW_SPI::write16(uint16_t)	32	static
-../Core/Inc/GFX_HW_SPI.h:218:15:virtual void GFX_HW_SPI::end()	8	static,ignoring_inline_asm
-../Core/Inc/GFX_HW_SPI.h:172:15:virtual void GFX_HW_SPI::writeCommand(uint8_t)	16	static,ignoring_inline_asm
-../Core/Inc/GFX_HW_SPI.h:162:15:virtual void GFX_HW_SPI::beginCommand()	16	static,ignoring_inline_asm
-../Core/Inc/GFX_HW_SPI.h:110:18:virtual uint8_t GFX_HW_SPI::readcommand8(uint8_t, uint8_t)	32	static,ignoring_inline_asm
-../Core/Inc/GFX_HW_SPI.h:135:19:virtual uint16_t GFX_HW_SPI::readcommand16(uint8_t)	32	static,ignoring_inline_asm
-../Core/Inc/GFX_HW_SPI.h:37:15:virtual void GFX_HW_SPI::sendCommand(uint8_t, const uint8_t*, uint8_t)	32	static,ignoring_inline_asm
-../Core/Inc/GFX_HW_SPI.h:184:15:virtual void GFX_HW_SPI::writeCommand16(uint16_t)	32	static,ignoring_inline_asm
-../Core/Inc/GFX_HW_SPI.h:87:15:virtual void GFX_HW_SPI::sendCommand16(uint16_t, uint16_t)	40	static,ignoring_inline_asm
-../Core/Inc/GFX_HW_SPI.h:62:15:virtual void GFX_HW_SPI::sendCommand16(uint16_t, const uint8_t*, uint8_t)	48	static,ignoring_inline_asm
-../Core/Inc/GFX_ILI9341.h:210:15:virtual void GFX_ILI9341::drawPixel(uint16_t, uint16_t, uint16_t)	32	static
-../Core/Src/mymain.cpp:43:6:void mysetup()	32	static
-../Core/Src/mymain.cpp:55:6:void setLeftWindow()	72	static
-../Core/Src/mymain.cpp:86:6:void vsync()	8	static
-../Core/Src/mymain.cpp:91:6:void startDMA()	0	static
-../Core/Src/mymain.cpp:95:6:void pushpixel(uint16_t)	0	static
-../Core/Src/mymain.cpp:97:1:cpp)	4	static
+../Core/Inc/GFX_HW_PAR16.h:257:22:virtual void GFX_HW_PAR16::low(GPIO_TypeDef*, uint16_t)	0	static
+../Core/Inc/GFX_HW_PAR16.h:261:22:virtual void GFX_HW_PAR16::high(GPIO_TypeDef*, uint16_t)	0	static
+../Core/Inc/GFX_HW_PAR16.h:265:15:virtual void GFX_HW_PAR16::MY_Delay()	0	static,ignoring_inline_asm
+../Core/Inc/GFX_HW_PAR16.h:269:15:virtual void GFX_HW_PAR16::MY_Delay1()	0	static,ignoring_inline_asm
+../Core/Inc/GFX_ILI9325.h:185:15:virtual void GFX_ILI9325::cls()	0	static
+../Core/Inc/GFX_ILI9325.h:221:15:virtual void GFX_ILI9325::setAddressWindow(uint16_t, uint16_t, uint16_t, uint16_t)	24	static
+../Core/Inc/GFX_ILI9325.h:277:22:virtual void GFX_ILI9325::pushPixel(uint16_t)	0	static
+../Core/Inc/GFX_ILI9325.h:281:15:virtual void GFX_ILI9325::end()	8	static
+../Core/Inc/GFX_ILI9325.h:161:15:virtual void GFX_ILI9325::init()	16	static
+../Core/Inc/GFX_ILI9325.h:189:15:virtual void GFX_ILI9325::setRotation(uint8_t)	8	static
+../Core/Inc/GFX_HW_PAR16.h:232:15:virtual void GFX_HW_PAR16::write16(uint16_t)	16	static,ignoring_inline_asm
+../Core/Inc/GFX_HW_PAR16.h:252:15:virtual void GFX_HW_PAR16::end()	16	static
+../Core/Inc/GFX_HW_PAR16.h:186:15:virtual void GFX_HW_PAR16::beginCommand()	24	static,ignoring_inline_asm
+../Core/Inc/GFX_HW_PAR16.h:228:15:virtual void GFX_HW_PAR16::write(uint8_t)	24	static,ignoring_inline_asm
+../Core/Inc/GFX_HW_PAR16.h:202:15:virtual void GFX_HW_PAR16::writeCommand16(uint16_t)	24	static,ignoring_inline_asm
+../Core/Inc/GFX_HW_PAR16.h:213:15:virtual void GFX_HW_PAR16::writeData(const uint8_t*, uint8_t)	32	static,ignoring_inline_asm
+../Core/Inc/GFX_HW_PAR16.h:155:19:virtual uint16_t GFX_HW_PAR16::readcommand16(uint8_t)	24	static,ignoring_inline_asm
+../Core/Inc/GFX_HW_PAR16.h:120:18:virtual uint8_t GFX_HW_PAR16::readcommand8(uint8_t, uint8_t)	32	static,ignoring_inline_asm
+../Core/Inc/GFX_HW_PAR16.h:37:15:virtual void GFX_HW_PAR16::reset(uint32_t)	16	static,ignoring_inline_asm
+../Core/Inc/GFX_HW_PAR16.h:92:15:virtual void GFX_HW_PAR16::sendCommand16(uint16_t, uint16_t)	32	static,ignoring_inline_asm
+../Core/Inc/GFX_HW_PAR16.h:194:15:virtual void GFX_HW_PAR16::writeCommand(uint8_t)	32	static,ignoring_inline_asm
+../Core/Inc/GFX_HW_PAR16.h:73:15:virtual void GFX_HW_PAR16::sendCommand16(uint16_t, const uint8_t*, uint8_t)	32	static,ignoring_inline_asm
+../Core/Inc/GFX_HW_PAR16.h:52:15:virtual void GFX_HW_PAR16::sendCommand(uint8_t, const uint8_t*, uint8_t)	32	static,ignoring_inline_asm
+../Core/Inc/GFX_ILI9325.h:269:15:virtual void GFX_ILI9325::drawPixel(uint16_t, uint16_t, uint16_t)	40	static
+../Core/Src/mymain.cpp:34:6:void vsync()	24	static
+../Core/Src/mymain.cpp:39:6:void mysetup()	24	static
+../Core/Src/mymain.cpp:51:6:void setLeftWindow()	80	static
+../Core/Src/mymain.cpp:82:6:void startDMA()	0	static
+../Core/Src/mymain.cpp:86:6:void pushpixel(uint16_t)	0	static
+../Core/Src/mymain.cpp:90:1:cpp)	4	static

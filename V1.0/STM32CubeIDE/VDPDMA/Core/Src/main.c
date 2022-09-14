@@ -70,6 +70,18 @@
 #define DMA_STATE_RUNNING 2
 #define DMA_STATE_CHUNK_COMPLETE 3
 
+#define SETUP_STATE_IDLE 0
+#define SETUP_STATE_INIT 1
+#define SETUP_STATE_SELECT_COLOUR 2
+#define SETUP_STATE_TUNE_Y_L 3
+#define SETUP_STATE_TUNE_Y_H 4
+#define SETUP_STATE_TUNE_RY_L 5
+#define SETUP_STATE_TUNE_RY_H 6
+#define SETUP_STATE_CANCEL 7
+
+#define BUTTONEVENT_CLICK 1
+#define BUTTON_EVENT_LONG_PRESS 2
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -106,6 +118,19 @@ volatile uint8_t frameReady;
 volatile uint8_t dmaState;
 
 volatile uint16_t pix;
+
+uint8_t encoderChanged;
+uint8_t encoderPosition;
+GPIO_PinState encoderButton;
+uint32_t encoderButtonChanged;
+uint8_t encoderPressed;
+uint8_t encoderLongPress;
+uint8_t buttonEvents;
+uint8_t buttonLastEvents;
+uint8_t setupColour;
+uint8_t setupLevel;
+
+uint8_t setupState;
 
 int _write(int file, char *ptr, int len) {
 	int DataIdx;
@@ -163,13 +188,11 @@ int main(void)
 	mysetup();
 
 	initBitMap();
-	initColorMaps(0.43/0.47, 1.72);
+	initColorMaps(0.43/0.47, 1.71);
 
 #ifndef PAR_TFT
 	swapRGBBytes();
 #endif
-
-	setLeftWindow();
 
 	HAL_TIM_RegisterCallback(&htim3, HAL_TIM_OC_DELAY_ELAPSED_CB_ID,
 			VSyncCallback);
@@ -191,6 +214,8 @@ int main(void)
 
 	HAL_TIM_Base_Start(&htim8); // Parallel TFT DMA line clock
 	HAL_TIM_Base_Start(&htim20); // Parallel TFT DMA pixel clock
+
+	HAL_TIM_Base_Start(&htim2);
 
 	//HAL_DMA_Start_IT(&hdma_tim20_ch1, (uint32_t)rgbBuf, (uint32_t)&GPIOC->ODR, RGB_BUF_LEN);
 	__HAL_TIM_ENABLE_DMA(&htim20, TIM_DMA_CC1);
@@ -214,12 +239,24 @@ int main(void)
 	}
 	HAL_TIM_OnePulse_Start(&htim8, TIM_CHANNEL_1);
 
+	HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
+
 	HAL_ADCEx_MultiModeStart_DMA(&hadc1, adcbuf, 512);
 
 	line = BLANKING_LINES; // Line 0 is when we detect vsync at the end of a frame
 	captureState = CAPTURE_STATE_SEEKING_SYNC;
-
 	dmaState = DMA_CAPTURE_STATE_IDLE;
+	setupState = SETUP_STATE_IDLE;
+	encoderPosition = 0;
+	encoderChanged = 0;
+	encoderButton = GPIO_PIN_SET;
+	encoderButtonChanged = 0;
+	encoderPressed = 0;
+	encoderLongPress = 0;
+	buttonEvents = 0;
+	buttonLastEvents = 0;
+	setupColour = 0;
+	setupLevel = 0;
 
 	rgbBufIdx = 0;
 	rgbBufchunk = 0;
@@ -236,6 +273,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+		handleEncoderInputs();
+		updateSetupState();
 
 		switch (captureState) {
 
@@ -465,6 +505,146 @@ void GPIODMAComplete(DMA_HandleTypeDef *dma) {
 	dmaState = DMA_STATE_CHUNK_COMPLETE;
 	__HAL_TIM_DISABLE(&htim8);
 	GPIOB->MODER = (GPIOB->MODER & 0xFFFFFFCF) | 0x00000010;
+}
+
+void handleEncoderInputs() {
+
+	uint32_t deltaT = HAL_GetTick() - encoderButtonChanged;
+
+	if ((htim2.Instance->CNT & 0xff) != encoderPosition) {
+		encoderPosition = htim2.Instance->CNT;
+		encoderChanged = 1;
+	} else {
+		encoderChanged = 0;
+	}
+
+	if (HAL_GPIO_ReadPin(ENCODER_PORT, ENCODER_PIN) != encoderButton) {
+		encoderButton = HAL_GPIO_ReadPin(ENCODER_PORT, ENCODER_PIN);
+		encoderButtonChanged = HAL_GetTick();
+	}
+
+	if (deltaT > ENCODER_BUTTON_DEBOUNCE) {
+		if (encoderButton == GPIO_PIN_SET) {
+			// button up - long or short click?
+			if (deltaT < ENCODER_BUTTON_LONG_PRESS) {
+				buttonEvents |= BUTTONEVENT_CLICK;
+			}
+		} else {
+			if (deltaT > ENCODER_BUTTON_LONG_PRESS) {
+				buttonEvents |= BUTTON_EVENT_LONG_PRESS;
+			}
+		}
+	}
+
+	if (buttonEvents != buttonLastEvents) {
+		if (buttonEvents & BUTTONEVENT_CLICK) {
+			encoderPressed = 1;
+		} else {
+			encoderPressed = 0;
+		}
+
+		if (buttonEvents & BUTTON_EVENT_LONG_PRESS) {
+			encoderLongPress = 1;
+		} else {
+			encoderLongPress = 0;
+		}
+	}
+
+	buttonLastEvents = buttonEvents;
+}
+
+void updateSetupState() {
+
+	if (encoderLongPress) {
+		setupState = SETUP_STATE_CANCEL;
+	} else {
+		if (encoderPressed) {
+			switch (setupState) {
+			case SETUP_STATE_IDLE:
+				setupState = SETUP_STATE_INIT;
+				break;
+			case SETUP_STATE_SELECT_COLOUR:
+				setupState = SETUP_STATE_TUNE_Y_L;
+				break;
+			case SETUP_STATE_TUNE_Y_L:
+				setupState = SETUP_STATE_TUNE_Y_H;
+				break;
+			case SETUP_STATE_TUNE_Y_H:
+				setupState = SETUP_STATE_TUNE_RY_L;
+				break;
+			case SETUP_STATE_TUNE_RY_L:
+				setupState = SETUP_STATE_TUNE_RY_H;
+				break;
+			case SETUP_STATE_TUNE_RY_H:
+				setupState = SETUP_STATE_SELECT_COLOUR;
+				break;
+			default:
+				break;
+			}
+		}
+	}
+}
+
+void processSetupState() {
+	switch(setupState) {
+	case SETUP_STATE_CANCEL:
+		cancelSetup();
+		break;
+	case SETUP_STATE_INIT:
+		initSetup();
+		// no break
+	case SETUP_STATE_SELECT_COLOUR:
+		if(encoderChanged) {
+			initSetupColour(encoderPosition % 16);
+		}
+		break;
+	case SETUP_STATE_TUNE_Y_L:
+		if(encoderChanged) {
+			tuneYL(encoderPosition);
+		}
+		break;
+	case SETUP_STATE_TUNE_Y_H:
+		if(encoderChanged) {
+			tuneYH(encoderPosition);
+		}
+		break;
+	case SETUP_STATE_TUNE_RY_L:
+		if(encoderChanged) {
+			tuneRYH(encoderPosition);
+		}
+		break;
+	case SETUP_STATE_TUNE_RY_H:
+		if(encoderChanged) {
+			tuneRYL(encoderPosition);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void cancelSetup() {
+
+}
+
+void initSetup() {
+	setLeftWindow();
+}
+
+void tuneYL(uint8_t s) {
+
+}
+
+void tuneYH(uint8_t s) {
+
+}
+
+void tuneRYL(uint8_t s) {
+
+}
+
+void tuneRYH(uint8_t s) {
+
 }
 
 /* USER CODE END 4 */

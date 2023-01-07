@@ -83,19 +83,20 @@ Configuration is in the file
 V1.0/STM32CubeIDE/VDPDMA/Core/Inc/configuration.h
 
 By default the code expects to use an SPI interface using SPI2
-
+```
   CS - PB9
   DC - PB8
   RS - PD2
   MOSI - PA11
   SCK - PF1
-
+```
 If you uncomment the line
-,,,#define PAR_TFT
+`#define PAR_TFT`
 then the code will expect a parallel display
-
+```
 D0 - D15 -> PC0 - PC15
 CS - PB11
 RS - PB12
 RD - PB14
 RESET - PB15
+```

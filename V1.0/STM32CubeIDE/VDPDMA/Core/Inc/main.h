@@ -65,11 +65,6 @@ void processSetupState();
 void initSetup();
 void cancelSetup();
 
-void tuneYL(uint8_t s);
-void tuneYH(uint8_t s);
-void tuneRYL(uint8_t s);
-void tuneRYH(uint8_t s);
-
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

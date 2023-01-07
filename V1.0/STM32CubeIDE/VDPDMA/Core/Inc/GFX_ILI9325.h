@@ -218,33 +218,33 @@ public:
 		HAL_Delay(10);
 	}
 
-	virtual void setAddressWindow(uint16_t left, uint16_t top, uint16_t width,
+	virtual void setAddressWindow(uint16_t x, uint16_t y, uint16_t width,
 			uint16_t height) {
 
 		uint16_t t, l, w, h;
 
 		switch (_rotation) {
 		case 0: // (0,0) is top left
-			t = top;
-			l = left;
+			t = y;
+			l = x;
 			w = width;
 			h = height;
 			break;
 		case 1: // (0,0) is top right - portrait
-			t = _height - (left + width);
-			l = _width - (top + height);
+			t = _height - (x + width);
+			l = _width - (y + height);
 			w = height;
 			h = width;
 			break;
 		case 2:
-			t = _height - (top + height);
-			l = _width - (left + width);
+			t = _height - (y + height);
+			l = _width - (x + width);
 			w = width;
 			h = height;
 			break;
 		case 3:
-			t = _height - (left + width);
-			l = top;
+			t = _height - (x + width);
+			l = y;
 			w = height;
 			h = width;
 			break;
@@ -257,10 +257,10 @@ public:
 		_hw.sendCommand16(ILI932X_HOR_END_AD, l + w - 1);
 
 		_hw.sendCommand16(ILI932X_VER_START_AD, t);
-		_hw.sendCommand16(ILI932X_VER_END_AD, _height - left -1);
+		_hw.sendCommand16(ILI932X_VER_END_AD, _height - x -1);
 
 		_hw.sendCommand16(ILI932X_GRAM_HOR_AD, l);
-		_hw.sendCommand16(ILI932X_GRAM_VER_AD, _height - left);
+		_hw.sendCommand16(ILI932X_GRAM_VER_AD, _height - x);
 
 		_hw.beginCommand();
 		_hw.writeCommand16(ILI932X_RW_GRAM);

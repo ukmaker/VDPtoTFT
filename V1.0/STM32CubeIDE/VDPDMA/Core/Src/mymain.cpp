@@ -7,7 +7,7 @@
 
 #include "main.h"
 #include "spi.h"
-#include "adc.h"
+#include "vdp.h"
 
 #include "GFX_HW_SPI.h"
 #include "GFX_HW_PAR16.h"
@@ -28,8 +28,21 @@ GFX_HW_SPI hwspi = GFX_HW_SPI(&hspi2, GPIOB, GPIO_PIN_9, GPIOB, GPIO_PIN_8, GPIO
 GFX_ILI9341 tft = GFX_ILI9341(hwspi);
 #endif
 
+#define BLOCKS_SIZE 9
+#define BLOCKS_SPACING 3
+#define BLOCK_TO_BLOCK (BLOCKS_SIZE + BLOCKS_SPACING)
+#define BLOCKS_HEIGHT ((BLOCKS_SIZE + BLOCKS_SPACING) * 16)
+#define BLOCKS_TOP ((240 - BLOCKS_HEIGHT) / 2)
+#define BLOCKS_LEFT 3
+#define BLOCK_POINTER_LEFT (BLOCKS_LEFT + BLOCKS_SIZE + 1)
+#define BLOCK_POINTER_SIZE BLOCKS_SIZE
+
 extern "C" {
 	void mysetup();
+
+	float setupYLevel;
+	float setupRYLevel;
+	float setupBYLevel;
 
 void vsync() {
 	tft.end();
@@ -40,51 +53,75 @@ void mysetup() {
 	tft.init();
 	tft.setRotation(3);
 	HAL_Delay(10);
-	tft.setAddressWindow(0, 0, 320, 240);
-	HAL_Delay(10);
-	for (int i = 0; i < (320 * 240); i++) {
-
-		tft.pushPixel(0xffff);
-	}
+	tft.drawFilledRectangle(0,0,320,240,rgbMap[WHITE+1]);
 }
-#define MAP(R,G,B) (((R & 0xf8) << 8) | ((G & 0xfc) << 3) | ((B & 0xF8) >> 3))
-void setLeftWindow() {
-	uint16_t rgbMap[17] = { MAP(0, 0, 0), MAP(0, 0, 0), MAP(0, 0, 0), MAP(33, 200,
-			66), MAP(94, 220, 120), MAP(84, 85, 237), MAP(125, 118, 252), MAP(212,
-			82, 77), MAP(66, 235, 245), MAP(252, 85, 84), MAP(255, 121, 120), MAP(
-			212, 193, 84), MAP(230, 206, 128), MAP(33, 176, 59), MAP(201, 91, 186),
-			MAP(204, 204, 204), MAP(255, 255, 255) };
 
-	tft.setAddressWindow(10,30,10,160);
+void enableSetupGUI() {
 
+	tft.drawFilledRectangle(BLOCKS_LEFT, BLOCKS_TOP, BLOCKS_SIZE, BLOCKS_HEIGHT,rgbMap[WHITE+1]);
 
 	// write the colors as blocks down the left
 	for (int i = 0; i < 15; i++) {
 		uint16_t color = rgbMap[i + 1];
-		for (int y = 0; y < 8; y++) {
-			// fill the gaps
-			tft.pushPixel(0xffff);
-			tft.pushPixel(0xffff);
-			for (int x = 0; x < 8; x++) {
-				tft.pushPixel(color);
-			}
-
-		}
-
-		for (int z = 0; z < 20; z++) {
-			tft.pushPixel(0xffff);
-		}
+		tft.drawFilledRectangle(BLOCKS_LEFT, BLOCKS_TOP + i * BLOCK_TO_BLOCK, BLOCKS_SIZE, BLOCKS_SIZE,color);
 	}
 
 	vsync();
 }
 
-void startDMA() {
-
+void disableSetupGUI() {
+	tft.drawFilledRectangle(0,0,320,240,rgbMap[WHITE+1]);
+	vsync();
 }
 
 void pushpixel(uint16_t c) {
 	tft.pushPixel(c);
+}
+
+void initSetupColour(uint8_t c) {
+	// draw a block of the given colour down the right hand side
+	tft.drawFilledRectangle(300,30,10,160, rgbMap[c+1]);
+
+	setupYLevel = YVolts[c];
+	setupRYLevel = RYVolts[c];
+
+	// clear the LHS pointer
+	tft.drawFilledRectangle(BLOCK_POINTER_LEFT,0,BLOCK_POINTER_LEFT+BLOCK_POINTER_SIZE,192, rgbMap[WHITE+1]);
+
+	uint16_t y = BLOCKS_TOP + BLOCKS_SIZE/2 + c * BLOCK_TO_BLOCK;
+	tft.fillTriangle(
+			BLOCK_POINTER_LEFT, y,
+			BLOCK_POINTER_LEFT + BLOCK_POINTER_SIZE, y - BLOCK_POINTER_SIZE/2,
+			BLOCK_POINTER_LEFT + BLOCK_POINTER_SIZE, y + BLOCK_POINTER_SIZE/2,
+			rgbMap[BLACK+1]);
+}
+
+void drawVoltageSetting(uint16_t colour, float datasheetLevel, float adjustedLevel) {
+	// draw a block of the given colour down the right hand side
+	tft.drawFilledRectangle(300,30,20,160, rgbMap[colour+1]);
+	// add a triangle inside to indicate the spreadsheet voltage level
+	uint16_t triangleColor = ~rgbMap[colour+1];
+	float vDS = datasheetLevel + offset;
+	uint16_t y = 30 + 130 * vDS / VREF;
+	tft.fillTriangle(301, y-5, 309, y, 301, y+5,triangleColor);
+
+	// draw a triangle at the new setting level
+	y = 30 + 130 * adjustedLevel / VREF;
+	tft.fillTriangle(319,y-5,311,y,319,y+5,triangleColor);
+
+	setColorLevels(YVolts, RYVolts);
+}
+
+void tuneY(uint8_t c, int s) {
+	float adjustedLevel = setupYLevel + (s - ADC_RESOLUTION_STEPS/2) * ONE_ADC_BIT / 2;
+	YVolts[c] = adjustedLevel;
+	drawVoltageSetting(c, YVoltsDatasheet[c], adjustedLevel);
+}
+
+void tuneRY(uint8_t c, int s) {
+	float adjustedLevel = setupRYLevel + (s - ADC_RESOLUTION_STEPS/2) * ONE_ADC_BIT / 2;
+	RYVolts[c] = adjustedLevel;
+	drawVoltageSetting(c, RYVoltsDatasheet[c], adjustedLevel);
 }
 
 }

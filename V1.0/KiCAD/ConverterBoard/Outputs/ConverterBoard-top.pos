@@ -1,0 +1,37 @@
+### Module positions - created on Thu Sep 22 18:34:16 2022 ###
+### Printed by Pcbnew version (6.0.6)
+## Unit = mm, Angle = deg.
+## Side : top
+# Ref     Val                Package                                           PosX       PosY       Rot  Side
+C1        100n               C_0805_2012Metric                             144.0750  -118.4750   90.0000  top
+C2        22p                C_0805_2012Metric                             126.2000   -98.4000   90.0000  top
+C3        22p                C_0805_2012Metric                             126.2000   -94.9000  -90.0000  top
+C4        100n               C_0805_2012Metric                             135.6000  -104.1000  -90.0000  top
+C5        100n               C_0805_2012Metric                             144.0750  -114.6600  -90.0000  top
+C6        100n               C_0805_2012Metric                             135.1850  -118.4750   90.0000  top
+C7        100n               C_0805_2012Metric                             135.1850  -114.6650  -90.0000  top
+C8        100n               C_0805_2012Metric                             142.2000  -104.1000   90.0000  top
+C9        100n               C_0805_2012Metric                             140.0000  -104.1000   90.0000  top
+C10       1u                 C_0805_2012Metric                             137.8000  -104.1000   90.0000  top
+C11       100n               C_0805_2012Metric                             131.7000  -101.2500  180.0000  top
+C12       100n               C_0805_2012Metric                             145.0950  -101.6000    0.0000  top
+C13       100n               C_0805_2012Metric                             145.2000   -88.4000    0.0000  top
+C14       100n               C_0805_2012Metric                             131.7500   -88.3500  180.0000  top
+C15       4u7                C_0805_2012Metric                             144.0750  -110.8550   90.0000  top
+C16       100n               C_0805_2012Metric                             159.6000   -65.9500  -90.0000  top
+C17       100n               C_0805_2012Metric                             126.2000   -75.8000  -90.0000  top
+C18       4u7                C_0805_2012Metric                             157.5000   -65.9500  -90.0000  top
+C19       4u7                C_0805_2012Metric                             128.9000   -75.8100  -90.0000  top
+D1        ESDA6V1-5SC6       SOT-23-6                                      135.6000   -75.2000    0.0000  top
+L1        600R_@_100MHz      L_0805_2012Metric_Pad1.15x1.40mm_HandSolder   135.1850  -110.7800   90.0000  top
+R1        47R                R_0805_2012Metric_Pad1.20x1.40mm_HandSolder   138.7000   -83.8000   90.0000  top
+R2        47R                R_0805_2012Metric_Pad1.20x1.40mm_HandSolder   145.0000   -83.8000  -90.0000  top
+R3        47R                R_0805_2012Metric_Pad1.20x1.40mm_HandSolder   142.9000   -83.8000  -90.0000  top
+R4        47R                R_0805_2012Metric_Pad1.20x1.40mm_HandSolder   140.8000   -83.8000  -90.0000  top
+R5        10R                R_0805_2012Metric_Pad1.20x1.40mm_HandSolder   127.1000   -88.9000  180.0000  top
+R6        47R                R_0805_2012Metric_Pad1.20x1.40mm_HandSolder   136.6000   -83.8000   90.0000  top
+R7        3K9                R_0805_2012Metric_Pad1.20x1.40mm_HandSolder   121.2000   -71.0000  180.0000  top
+U1        XC6503D331PR-G     SOT-89-5_Handsoldering                        148.1790  -116.3480   90.0000  top
+U2        XC6503D331PR-G     SOT-89-5_Handsoldering                        139.4000  -116.2500   90.0000  top
+U3        MCU_STM32G474RCT6  LQFP-64_10x10mm_P0.5mm                        138.4300   -94.7420    0.0000  top
+## End

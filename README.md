@@ -15,7 +15,7 @@ All it needs is an STM32G4 microcontroller. I used a Nucleo-G474RE board because
 # But Does It Work?
 Yes, it does. I confess to being suprised that I was able to make it work. There is a little bit of flicker in a couple of the colours, due to noise in the sampling process, so I have a couple of improvements I'll be working on. 
 - Tweak the on-board VREF to output a lower voltage (2.8V instead of 3.25) thus potentially increasing the ADC accuracy.
-- Build a custom PCB
+- Build a better custom PCB. The first version has some errors.
 
 I may end up making a custom PCB including the TMS chip so there's an all-in-one solution for RC2014 folks. Let me know if you would like this.
 
@@ -73,4 +73,29 @@ For now, there is little to do to build this other than
 - Plug everything in 
 - Click Run in the IDE
 
+Note that all the code etc is in the V1.0 directory. I had some small learning opportunities once I'd received my first set of PCBs, and the changes in the V2.0 folder are just for the schematic and layout.
+
 ## Connecting Your Display
+The code is capable of driving displays using either an SPI or parallel interface. 
+
+Configuration is in the file
+
+V1.0/STM32CubeIDE/VDPDMA/Core/Inc/configuration.h
+
+By default the code expects to use an SPI interface using SPI2
+
+  CS - PB9
+  DC - PB8
+  RS - PD2
+  MOSI - PA11
+  SCK - PF1
+
+If you uncomment the line
+,,,#define PAR_TFT
+then the code will expect a parallel display
+
+D0 - D15 -> PC0 - PC15
+CS - PB11
+RS - PB12
+RD - PB14
+RESET - PB15

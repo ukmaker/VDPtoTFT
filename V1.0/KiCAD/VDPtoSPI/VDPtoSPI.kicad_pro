@@ -324,6 +324,10 @@
     [
       "1929d1e9-1472-44d5-bb5a-6ba1c1c66e1c",
       "Pinouts"
+    ],
+    [
+      "edcb695f-3c5d-4e62-80d2-e57589dd54c9",
+      "Wiring"
     ]
   ],
   "text_variables": {}

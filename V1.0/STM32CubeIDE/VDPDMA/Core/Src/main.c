@@ -73,11 +73,12 @@
 #define SETUP_STATE_IDLE 0
 #define SETUP_STATE_INIT 1
 #define SETUP_STATE_SELECT_COLOUR 2
-#define SETUP_STATE_TUNE_Y_L 3
-#define SETUP_STATE_TUNE_Y_H 4
-#define SETUP_STATE_TUNE_RY_L 5
-#define SETUP_STATE_TUNE_RY_H 6
-#define SETUP_STATE_CANCEL 7
+#define SETUP_STATE_INIT_Y 3
+#define SETUP_STATE_TUNE_Y 4
+#define SETUP_STATE_INIT_RY 5
+#define SETUP_STATE_TUNE_RY 6
+#define SETUP_STATE_TUNE_SAMPLE_TIME 7
+#define SETUP_STATE_CANCEL 8
 
 #define BUTTONEVENT_CLICK 1
 #define BUTTON_EVENT_LONG_PRESS 2
@@ -112,6 +113,7 @@ volatile uint32_t rgbBufIdx;
 uint8_t rgbBufchunk;
 
 volatile uint32_t adcbuf[512];
+volatile uint32_t adc3buf[512];
 volatile int16_t line;
 volatile uint8_t captureState;
 volatile uint8_t frameReady;
@@ -121,14 +123,16 @@ volatile uint16_t pix;
 
 uint8_t encoderChanged;
 uint8_t encoderPosition;
-GPIO_PinState encoderButton;
-uint32_t encoderButtonChanged;
-uint8_t encoderPressed;
-uint8_t encoderLongPress;
-uint8_t buttonEvents;
-uint8_t buttonLastEvents;
+uint8_t lastPressed;
+uint32_t encoderButtonChangedTicks;
 uint8_t setupColour;
-uint8_t setupLevel;
+
+uint8_t raisedClickedEvent;
+uint8_t raisedLongPressEvent;
+
+uint8_t encoderClickedEvent;
+uint8_t encoderLongPressEvent;
+
 
 uint8_t setupState;
 
@@ -217,7 +221,6 @@ int main(void)
 
 	HAL_TIM_Base_Start(&htim2);
 
-	//HAL_DMA_Start_IT(&hdma_tim20_ch1, (uint32_t)rgbBuf, (uint32_t)&GPIOC->ODR, RGB_BUF_LEN);
 	__HAL_TIM_ENABLE_DMA(&htim20, TIM_DMA_CC1);
 
 	if (HAL_TIM_OnePulse_Start(&htim4, TIM_CHANNEL_1) != HAL_OK) {
@@ -249,14 +252,15 @@ int main(void)
 	setupState = SETUP_STATE_IDLE;
 	encoderPosition = 0;
 	encoderChanged = 0;
-	encoderButton = GPIO_PIN_SET;
-	encoderButtonChanged = 0;
-	encoderPressed = 0;
-	encoderLongPress = 0;
-	buttonEvents = 0;
-	buttonLastEvents = 0;
+	lastPressed = GPIO_PIN_SET;
+	encoderButtonChangedTicks = 0;
+	encoderClickedEvent = 0;
+	encoderLongPressEvent = 0;
 	setupColour = 0;
-	setupLevel = 0;
+
+	// set to true otherwise there will be a spurious event raised at startup
+	raisedClickedEvent = 1;
+	raisedLongPressEvent = 0;
 
 	rgbBufIdx = 0;
 	rgbBufchunk = 0;
@@ -276,6 +280,7 @@ int main(void)
 
 		handleEncoderInputs();
 		updateSetupState();
+		processSetupState();
 
 		switch (captureState) {
 
@@ -508,74 +513,67 @@ void GPIODMAComplete(DMA_HandleTypeDef *dma) {
 }
 
 void handleEncoderInputs() {
+	encoderLongPressEvent = 0;
+	encoderClickedEvent = 0;
 
-	uint32_t deltaT = HAL_GetTick() - encoderButtonChanged;
+	uint8_t pressed = HAL_GPIO_ReadPin(ENCODER_PORT, ENCODER_PIN) == GPIO_PIN_RESET;
 
-	if ((htim2.Instance->CNT & 0xff) != encoderPosition) {
-		encoderPosition = htim2.Instance->CNT;
+	if (((htim2.Instance->CNT & 0xff) >> 1) != encoderPosition) {
+		encoderPosition = (htim2.Instance->CNT & 0XFF) >> 1;
 		encoderChanged = 1;
 	} else {
 		encoderChanged = 0;
 	}
 
-	if (HAL_GPIO_ReadPin(ENCODER_PORT, ENCODER_PIN) != encoderButton) {
-		encoderButton = HAL_GPIO_ReadPin(ENCODER_PORT, ENCODER_PIN);
-		encoderButtonChanged = HAL_GetTick();
+	if (pressed != lastPressed) {
+		lastPressed = pressed;
+		encoderButtonChangedTicks = HAL_GetTick();
 	}
 
-	if (deltaT > ENCODER_BUTTON_DEBOUNCE) {
-		if (encoderButton == GPIO_PIN_SET) {
-			// button up - long or short click?
-			if (deltaT < ENCODER_BUTTON_LONG_PRESS) {
-				buttonEvents |= BUTTONEVENT_CLICK;
+	uint32_t deltaT = HAL_GetTick() - encoderButtonChangedTicks;
+
+	if (pressed && deltaT > ENCODER_BUTTON_DEBOUNCE) {
+		raisedClickedEvent = 0;
+	}
+
+	if (!pressed && deltaT > ENCODER_BUTTON_DEBOUNCE) {
+		if(raisedClickedEvent == 0) {
+			raisedClickedEvent = 1;
+			if(!raisedLongPressEvent) {
+				// only actually raise the event if it is not following a long click
+				encoderClickedEvent = 1;
 			}
-		} else {
-			if (deltaT > ENCODER_BUTTON_LONG_PRESS) {
-				buttonEvents |= BUTTON_EVENT_LONG_PRESS;
-			}
+			raisedLongPressEvent = 0;
+		}
+	} else if (pressed && deltaT > ENCODER_BUTTON_LONG_PRESS) {
+		if(raisedLongPressEvent == 0) {
+			raisedLongPressEvent = 1;
+			encoderLongPressEvent = 1;
 		}
 	}
-
-	if (buttonEvents != buttonLastEvents) {
-		if (buttonEvents & BUTTONEVENT_CLICK) {
-			encoderPressed = 1;
-		} else {
-			encoderPressed = 0;
-		}
-
-		if (buttonEvents & BUTTON_EVENT_LONG_PRESS) {
-			encoderLongPress = 1;
-		} else {
-			encoderLongPress = 0;
-		}
-	}
-
-	buttonLastEvents = buttonEvents;
 }
 
 void updateSetupState() {
 
-	if (encoderLongPress) {
-		setupState = SETUP_STATE_CANCEL;
+	if (encoderLongPressEvent) {
+		if(setupState == SETUP_STATE_IDLE) {
+			setupState = SETUP_STATE_TUNE_SAMPLE_TIME;
+		} else {
+			setupState = SETUP_STATE_CANCEL;
+		}
 	} else {
-		if (encoderPressed) {
+		if (encoderClickedEvent) {
 			switch (setupState) {
 			case SETUP_STATE_IDLE:
 				setupState = SETUP_STATE_INIT;
 				break;
 			case SETUP_STATE_SELECT_COLOUR:
-				setupState = SETUP_STATE_TUNE_Y_L;
+				setupState = SETUP_STATE_INIT_Y;
 				break;
-			case SETUP_STATE_TUNE_Y_L:
-				setupState = SETUP_STATE_TUNE_Y_H;
+			case SETUP_STATE_TUNE_Y:
+				setupState = SETUP_STATE_INIT_RY;
 				break;
-			case SETUP_STATE_TUNE_Y_H:
-				setupState = SETUP_STATE_TUNE_RY_L;
-				break;
-			case SETUP_STATE_TUNE_RY_L:
-				setupState = SETUP_STATE_TUNE_RY_H;
-				break;
-			case SETUP_STATE_TUNE_RY_H:
+			case SETUP_STATE_TUNE_RY:
 				setupState = SETUP_STATE_SELECT_COLOUR;
 				break;
 			default:
@@ -586,37 +584,48 @@ void updateSetupState() {
 }
 
 void processSetupState() {
+
 	switch(setupState) {
 	case SETUP_STATE_CANCEL:
 		cancelSetup();
+		setupState = SETUP_STATE_IDLE;
 		break;
 	case SETUP_STATE_INIT:
 		initSetup();
+		setupState = SETUP_STATE_SELECT_COLOUR;
+		htim2.Instance->CNT = 0;
+		encoderPosition = 0;
+		setupColour = (encoderPosition % 16);
+		initSetupColour(setupColour);
+		break;
 		// no break
 	case SETUP_STATE_SELECT_COLOUR:
 		if(encoderChanged) {
-			initSetupColour(encoderPosition % 16);
+			setupColour = (encoderPosition % 16);
+			initSetupColour(setupColour);
 		}
 		break;
-	case SETUP_STATE_TUNE_Y_L:
+	case SETUP_STATE_INIT_Y:
+		htim2.Instance->CNT = ADC_RESOLUTION_STEPS / 2;
+		setupState = SETUP_STATE_TUNE_Y;
+		break;
+	case SETUP_STATE_TUNE_Y:
 		if(encoderChanged) {
-			tuneYL(encoderPosition);
+			tuneY(setupColour, encoderPosition % ADC_RESOLUTION_STEPS);
 		}
 		break;
-	case SETUP_STATE_TUNE_Y_H:
+	case SETUP_STATE_INIT_RY:
+		htim2.Instance->CNT = ADC_RESOLUTION_STEPS / 2;
+		setupState = SETUP_STATE_TUNE_RY;
+		break;
+	case SETUP_STATE_TUNE_RY:
 		if(encoderChanged) {
-			tuneYH(encoderPosition);
+			tuneRY(setupColour, encoderPosition % ADC_RESOLUTION_STEPS);
 		}
 		break;
-	case SETUP_STATE_TUNE_RY_L:
-		if(encoderChanged) {
-			tuneRYH(encoderPosition);
-		}
-		break;
-	case SETUP_STATE_TUNE_RY_H:
-		if(encoderChanged) {
-			tuneRYL(encoderPosition);
-		}
+	case SETUP_STATE_TUNE_SAMPLE_TIME:
+		// adjust where the ADC sampling starts
+		htim4.Instance->CCR1 = 1148 + (encoderPosition % 16) - 8;
 		break;
 	default:
 		break;
@@ -624,27 +633,11 @@ void processSetupState() {
 }
 
 void cancelSetup() {
-
+	disableSetupGUI();
 }
 
 void initSetup() {
-	setLeftWindow();
-}
-
-void tuneYL(uint8_t s) {
-
-}
-
-void tuneYH(uint8_t s) {
-
-}
-
-void tuneRYL(uint8_t s) {
-
-}
-
-void tuneRYH(uint8_t s) {
-
+	enableSetupGUI();
 }
 
 /* USER CODE END 4 */

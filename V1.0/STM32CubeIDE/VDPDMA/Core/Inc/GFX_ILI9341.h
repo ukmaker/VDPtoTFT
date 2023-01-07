@@ -188,19 +188,19 @@ public:
 	  HAL_Delay(10);
 	}
 
-	virtual void setAddressWindow(uint16_t left, uint16_t top, uint16_t width,
+	virtual void setAddressWindow(uint16_t x, uint16_t y, uint16_t width,
 			uint16_t height) {
 
 		_hw.beginCommand();
 
 		_hw.writeCommand(ILI9341_CASET); // Column address set
-		_hw.write16(left);
-		_hw.write16(left + width - 1);
+		_hw.write16(x);
+		_hw.write16(x + width - 1);
 
 		_hw.beginCommand();
 		_hw.writeCommand(ILI9341_PASET); // Row address set
-		_hw.write16(top);
-		_hw.write16(top + height - 1);
+		_hw.write16(y);
+		_hw.write16(y + height - 1);
 
 		_hw.beginCommand();
 		_hw.writeCommand(ILI9341_RAMWR); // Write to RAM

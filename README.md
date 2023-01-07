@@ -68,6 +68,8 @@ For now, there is little to do to build this other than
 - Install STM32CubeIDE if you haven't already got it
 - Download this repo
 - Open the project in the IDE and build it
+- Tweak appropriate jumpers on your Nucleo (see below)
+- Wire up a trimpot to set the sync level
 - Connect the Nucleo to the display of your choice (see below)
 - Connect the Nucleo to your VDP
 - Plug everything in 
@@ -75,12 +77,37 @@ For now, there is little to do to build this other than
 
 Note that all the code etc is in the V1.0 directory. I had some small learning opportunities once I'd received my first set of PCBs, and the changes in the V2.0 folder are just for the schematic and layout.
 
+The ConverterBoard directory contains a schematic for implementing this directly with an STM32G474.
+
+The VDPtoSPI directory contains pseudo-schematics for how the blocks in the MCU are used.
+
+## Nucleo Tweaking
+Because I needed to use quite a few pins in non-standard ways (for a Nucleo), I needed to remove quite a few jumpers. I'm not sure I remember them all now, but here goes:
+
+### Using the clock from the VDP to drive HSE on PF0.
+```
+SB28 ON (Connect OSCIN to PF0 header pin)
+SB24, SB25, SB26, 27 OFF 
+```
+### Connect PC14 and PC15 to header pins
+```
+SB29, SB32 ON
+```
+
+### The Sync Trimpot
+The sync signal is derived by configuring Comparator 1 and feeding the positive input with the Y signal and the negative input with a constant voltage from a trimpot to set the threshold. Connecct a trimmer of e.g. 10K to 3V3 and GND, with the wiper going to PB1. You should also add a decoupling capacitor of e.g. 100n from PB1 to ground.
+
+Once the board is up and running and you are feeding it a signal from your VDP, adjust the trimpot to obtain a stable display. This can bbe made easier with a two-channel scope attached to Y and PB1 so you can position the voltage on PB1 in the middle of the sync tips.
+
+If you have trouble getting your scope to sync to the VDP signal you might want to look at my other project which is a tool to get a clean trigger off any chosen line on the display. https://github.com/ukmaker/VideoTrigger
+
+
 ## Connecting Your Display
 The code is capable of driving displays using either an SPI or parallel interface. 
 
 Configuration is in the file
 
-V1.0/STM32CubeIDE/VDPDMA/Core/Inc/configuration.h
+`V1.0/STM32CubeIDE/VDPDMA/Core/Inc/configuration.h`
 
 By default the code expects to use an SPI interface using SPI2
 ```
@@ -100,3 +127,8 @@ RS - PB12
 RD - PB14
 RESET - PB15
 ```
+
+# Making the PCB
+Don't use the V1.0 board - there are some annoying errors.
+
+Also, I hope you're better at soldering surface-mount than I am. My first attempt is best described using words like "embarrassment", "cringe" and "pillock". Watch out for those STM chips. Sometimes they have two little circles on the package. Make sure you know which one means Pin 1 Is Here. Then make sure again.
